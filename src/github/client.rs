@@ -221,6 +221,24 @@ impl Client {
         self.deserialize(&mut self.patch(&url, &payload)?)
     }
 
+    pub fn append_to_op(&self, repo: &str, issue_num: i32, current_body: &str, text_to_append: &str)
+        -> DashResult<()>
+    {
+        let url = format!("{}/repos/{}/issues/{}",
+                          BASE_URL,
+                          repo,
+                          issue_num);
+
+        let new_body = format!("{}\n----\n## {}\n{}",
+                               current_body,
+                               Utc::now().format("%B %d %Y"),
+                               text_to_append);
+
+        let payload = serde_json::to_string(&btreemap!("body" => new_body))?;
+
+        self.deserialize(&mut self.patch(&url, &payload)?)
+    }
+
     fn patch(&self, url: &str, payload: &str) -> Result<Response, hyper::error::Error> {
         self.set_headers(self.client.patch(url).body(payload))
             .send()

@@ -240,6 +240,9 @@ fn from_invocation_line<'a>
 
             Ok(RfcBotCommand::FeedbackRequest(&user[1..]))
         }
+        "summarize" | "summary" => {
+            Ok(RfcBotCommand::Summary)
+        }
         _ => parse_fcp_subcommand(setup, command, invocation, false),
     }
 }
@@ -256,6 +259,7 @@ pub enum RfcBotCommand<'a> {
         teams: BTreeSet<&'a str>,
         question: &'a str,
     },
+    Summary,
 }
 
 impl<'a> RfcBotCommand<'a> {

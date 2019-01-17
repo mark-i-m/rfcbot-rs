@@ -33,6 +33,11 @@ impl Issue {
         ok_or!(GH.close_issue(&self.repository, self.number), why =>
             error!("Unable to close issue {:?}: {:?}", self, why));
     }
+
+    fn append_to_op(&self, text_to_append: &str) {
+        ok_or!(GH.append_to_op(&self.repository, self.number, &self.body, text_to_append),
+               why => error!("Unable to append to issue OP {:?}: {:?}", self, why))
+    }
 }
 
 lazy_static! {
@@ -731,6 +736,8 @@ impl<'a> RfcBotCommand<'a> {
                 process_resolve_concern(author, issue, comment, concern_name),
             FeedbackRequest(username) =>
                 process_feedback_request(author, issue, username),
+            Summary =>
+                process_summary_request(author, issue, comment),
         }
     }
 }
@@ -1034,6 +1041,13 @@ fn process_feedback_request(author: &GitHubUser, issue: &Issue, username: &str)
             .execute(conn)?;
     }
 
+    Ok(())
+}
+
+fn process_summary_request(author: &GitHubUser, issue: &Issue, comment: &IssueComment)
+    -> DashResult<()>
+{
+    issue.append_to_op(&comment.body);
     Ok(())
 }
 
